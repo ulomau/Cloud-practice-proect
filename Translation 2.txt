@@ -1,0 +1,183 @@
+
+Lab Topic: Creating Virtual Machines From the course (Essential Google Cloud Infrastructure:Foundation)
+
+-----
+##Overview
+In this lab, you will explore the Virtual Machine instance options and create several VMs with different characteristics.
+
+##Objectives
+In this lab, you explore the available options for VMs and see the differences between locations.
+
+In this lab, you learn how to perform the following tasks:
+
+Create several standard VMs
+
+Create advanced VMs. 
+
+## Creating a virtual machine using gcloud command line
+
+To create a virtual machine using gcloud command line, you will be needing Cloud Shell.
+Cloud Shell is a virtual machine that is loaded with development tools. It offers a persistent 5GB home directory and runs on the Google Cloud. 
+Cloud Shell provides command-line access to your Google Cloud resources.
+it takes a few moments to provision and connect to the environment. When you are connected, you are already authenticated,
+ and the project is set to your PROJECT_ID.
+gcloud is a great command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab-completion.
+
+Step1:Sign into GCP (Google Cloud Platform) Console with the credentials provided by qwiklabs or using your account.
+Step 2:Once you are inside GCP console, on the top right toolbar click the cloud shell icon to activate cloud shell. When prompted, click continue
+
+Task 1:Create a new virtual machine instance
+to list active account name, run the following command;
+
+--gcloud auth list
+
+To list the project ID, run the following command;
+
+--gcloud config list project qwiklabs-gcp-02-15d80512ecad
+
+To set the Region and Zone for the project, run the following command
+
+gcloud config set compute/zone us-central1-c
+
+gcloud config set compute/region us-central1
+
+To create a new virtual machine instance in the Cloud shell run the following command;
+
+gcloud compute instances create uloma-vm-1 --machine-type n1-standard-1 --zone us-central1-c --no-address
+
+(Note: choose any unique name for your instance)
+
+This above command after running will give you an output like this;
+
+Created [...uloma-vm-1].
+NAME        ZONE           MACHINE_TYPE  ...    STATUS
+uloma-vm-1  us-central1-c  n1-standard-1 ...    RUNNING
+
+To close the Cloud Shell, execute the following command:
+
+--exit
+
+Task 2:Create a windows (Virtual Machine) VM:
+
+To create a windows (Virtual Machine) VM:
+to list active account name, run the following command;
+
+--gcloud auth list
+
+To list the project ID, run the following command;
+
+--gcloud config list project qwiklabs-gcp-02-15d80512ecad
+
+To set the Region and Zone for the project, run the following command
+
+gcloud config set compute/zone us-central1-c
+
+gcloud config set compute/region us-central1
+
+To create a new windows virtual machine instance in the Cloud shell run the following command;
+
+
+Use the compute images list command to see a list of available Windows Server images:
+
+--gcloud compute images list --project windows-cloud --no-standard-images
+
+To determine whether an image supports Shielded VM features, run the following command, 
+
+--gcloud compute images describe Windows Server 2016 Datacenter Core --project windows-cloud
+
+Use the compute instances create command to create a new instance and specify the image family for one of the Windows Server public images.
+
+gcloud compute instances create uloma-vm-2 \
+    --image-project windows-cloud \
+    --image-family Windows Server 2016 Datacenter Core \
+    --machine-type n1-standard-2 \
+    --boot-disk-size 100 \
+    --boot-disk-type SSD persistent disk
+    --tags http-server,https-server
+
+The above command would create an instance running an n1-standard-2 machine type with SSD persistent disk of size of 100GB y 
+   
+where:
+
+[INSTANCE_NAME] is the name for the new instance.
+[IMAGE_FAMILY] is one of the public image families for Windows Server images.
+[MACHINE_TYPE] is one of the available machine types.
+[BOOT_DISK_SIZE] is the size of the boot disk in GB.Note that larger persistent disks have higher throughput.
+[BOOT_DISK_TYPE] is the type of the boot disk for your instance. For example, pd-ssd.
+  
+ 
+To set password for the  windows VM created:
+
+Use the gcloud compute reset-windows-password command to create a new account and password or reset the existing account password for the logged in user:
+
+--gcloud compute reset-windows-password uloma-vm-2
+
+You will be presented with a confirmation prompt; this will need to be accepted by entering Y and pressing Enter. 
+It can be rejected by entering N, then pressing Enter.
+
+This command creates an account and sets an initial password for the
+user [username] if the account does not already exist.
+If the account already exists, resetting the password can cause the
+LOSS OF ENCRYPTED DATA secured with the current password, including
+files and stored passwords.
+
+For more information, see:
+https://cloud.google.com/compute/docs/operating-systems/windows#reset
+
+-Would you like to set or reset the password for [username] (Y/n)?
+
+Once confirmed, confirmation of password reset will look as follows.
+
+Resetting and retrieving password for [username] on [instance-name]
+Updated [https://www.googleapis.com/compute/v1/projects/project-name/zones/zone/instances/instance-name].
+ip_address: ip-address
+password:   password
+username:   username
+
+You may now connect to the instance using the provided username and password combination.
+
+To exit Cloud Shell, run the following command;
+
+--exit
+
+Task 3:Create a Custom VM
+
+To create a Custom VM:
+
+to list active account name, run the following command;
+
+--gcloud auth list
+
+To list the project ID, run the following command;
+
+--gcloud config list project qwiklabs-gcp-02-15d80512ecad
+
+To set the Region and Zone for the project, run the following command
+
+--gcloud config set compute/zone us-west1-b
+
+--gcloud config set compute/region us-west1
+
+To create a new  custom VM instance in the Cloud shell run the following command;
+
+--gcloud compute instances create uloma-vm-3 --custom-cpu 6 --custom-memory 32
+
+ The above command would create an instance running an N1 machine type with 6 vCPUs and 32GB of total memory 
+   
+Note:The gcloud command for custom machine types differs slightly depending on the machine type family.
+
+
+Note: it is advised to delete VM intances for provisioned labs.
+To delete the custom VM above using the gcloud command-line tool, run the following command:
+
+gcloud compute instances delete uloma-vm-3 --zone=us-central2-a
+
+repeat same for all the VMs created above
+
+To close cloud shell, run the following command;
+
+--exit
+
+
+
+

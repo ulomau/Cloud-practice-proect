@@ -1,0 +1,75 @@
+#Lab topic:  :AK8S-05 Upgrading Kubernetes Engine Clusters. From the course--Architecting with Google Kubernetes Engine-Workload
+(Associate Cloud Engineer: Learning Phase 1 Main Track Channel 2020)
+
+------
+
+#Overview:
+ 
+In this lab you will learn how to use gcloud command line to deploy and upgrade your GKE cluster
+ 
+
+##Objectives:
+
+Perform the following tasks.
+
+Task 1: Deploy a (Google Kubernetes Engine) GKE cluster using gcloud Command line
+
+Task 2: upgrade a GKE cluster using the gcloud command line.
+
+#Task 1
+
+1.Sign into Google Cloud Platform (GCP) using qwiklabs credentials provided or through your account.
+
+2. Once in GCP, in the tittle bar click on the cloud shell icon to activate  cloud shell. when prompted, click continue.
+
+3. To list active account name run the following command:
+
+--gcloud auth list
+
+4.to set a default project ID , run the following command
+
+--gcloud config set project [project-id]
+
+Note:replace [project-id] above with the project ID provided in the lab
+
+5. To set a default compute zone run the following command
+
+--gcloud config set compute/zone [compute zone]
+Note: Replace [compute zone] above with any zone of choice or the one provided in the lab
+
+6. Deploy a GKE cluster by running the following command
+
+--gcloud container clusters create [cluster-name]
+Note: Replace [cluster-name] above with the unique name chosen for your cluster
+
+
+#Task 2
+
+1. To upgrade your cluster master's version, first run the following command to see the available versions 
+
+--gcloud container get-server-config 
+
+2.To upgrade from the default version to a specific version recent(highest)build, run the following command
+
+--gcloud container clusters upgrade [cluster-name] \
+  --master --cluster-version [cluster-version]
+
+Note: replace [cluster-version] in the coomand above with the cluster version
+
+3.To upgrade the node pool in your cluster, run the following command to upgrade your nodes to the version that your master is running on
+
+--gcloud container clusters upgrade [cluster-name] \
+  --node-pool=[node-pool-name]
+
+4.To see a list of all running and completed operation in the cluster, run the following command
+
+--gcloud beta container operations list
+
+Note: it is advised to delete cluster for provisioned labs.
+To delete a cluster using the gcloud command-line tool, run the following command:
+
+gcloud container clusters delete [CLUSTER_NAME]
+
+To close cloud shell, run the following command;
+
+--exit

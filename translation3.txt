@@ -1,0 +1,251 @@
+## Lab topic: Creating GKE (Google Kubernetes Engine) via GCP Console.---From the topic Arcitecting with Google Kubernetes Engine-Foundation(Phase 1 learning Dee dive)
+
+## Overview:
+In this lab, we will be using the Google command line to build GKE clusters and deploy a sample Pod instead of GCP Console.
+
+##Objectives:
+
+In this lab, you will learn how to perform the following tasks:
+
+Use the Google command line to build and manipulate GKE clusters
+
+Use the Google command to deploy a Pod
+
+Use the Google command to examine the cluster and Pods
+
+##Task 1: 
+
+1.Sign into Google Cloud Platform (GCP) using qwiklabs credentials provided or  through your account.
+
+2. Once in GCP, in the tittle bar click on the cloud shell icon to activate  cloud shell. when prompted, click continue.
+
+ ## Task 2:Deploy a GKE cluster
+
+1. To list active account name run the following command:
+
+--gcloud auth list
+
+2.to set a default project ID , run the following command
+
+--gcloud config set project qwiklabs-gcp-02-15d80512ecad
+
+
+3. To set a default compute zone run the following command
+
+--gcloud config set compute/zone us-central1-a
+
+4. Deploy a GKE cluster by running the following command
+
+--gcloud container clusters create standard-cluster-1 --num-nodes 3 --zone us-central1-a --enable-ip-alias
+
+You will see a number of warnings highlighting changes to default GKE cluster settings that were introduced as newer version of Kubernetes have been adopted by GKE.
+
+The new cluster (standard-cluster-1) takes several minutes to deploy.
+ 
+Note: The above command will deploy a GKE cluster with the name standard-cluster-1,3 nodes in us-central1-a zone.
+
+## Task 3: Modify GKE clusters
+It is easy to modify many of the parameters of existing clusters in GCP Console or Cloud Shell.
+In this task, you will use Cloud Shell to modify the number of nodes in a GKE cluster
+
+ To modify standard-cluster-1 to have four nodes, execute the following command in Cloud Shell,
+
+--gcloud container clusters resize standard-cluster-1 --zone us-central1-a --size=4
+
+When prompted with Do you want to continue (Y/n), press y to confirm.
+
+Note: You can connect to a GKE cluster by using Cloud Shell to authenticate to a GKE cluster and then inspect the kubectl configuration files.
+ Run the following commands to achieve that
+
+--gcloud container clusters get-credentials standard-cluster-1 --zone us-central1-a
+
+Open the kubeconfig file with the nano text editor:
+
+--nano ~/.kube/config
+
+You can now examine all of the authentication and endpoint configuration data stored in the file. Information for both clusters should appear. 
+The information was populated during cluster creation.
+
+Press CTRL+X to exit the nano editor.
+
+##Task 4: Deploy a sample workload
+
+In this task 4, using the Google command line, you will deploy a Pod running the nginx web server as a sample workload.
+
+To deploy the latest version of nginx as a Pod named nginx-1, execute the following command in Cloud Shell,
+
+--kubectl run nginx-1 --image nginx:latest
+
+To view all the deployed Pods in the active context cluster, execute the following command in Cloud Shell,  
+
+--kubectl get pods
+
+To enter your Pod name into a variable that we will use throughout this lab, execute the following command
+
+--export my_nginx_pod=nginx-1
+
+To confirm that you have set the environment variable successfully, execute the the following to have the shell echo the value back to you:
+
+--echo nginx-1
+
+In Cloud Shell, execute the following command to view the complete details of the Pod you just created.
+
+--kubectl describe pod ngnix-1
+
+To be able to serve static content through the nginx web server, you must create and place a file into the container.
+
+In Cloud Shell, type the following commands to open a file named test.html in the nano text editor.
+
+--nano ~/test.html
+
+Add the following text (shell script) to the empty test.html file:
+
+--<html> <header><title>This is title</title></header>
+  <body> Hello world </body>
+  </html>
+
+Press CTRL+X, then press Y and enter to save the file and exit the nano editor.
+
+ To place the file into the appropriate location within the nginx container in the nginx Pod to be served statically, execute the following command  in Cloud Shell,
+
+--kubectl cp ~/test.html nginx-1:/usr/share/nginx/html/test.html
+
+ To create a service to expose our nginx Pod externally,  execute the following command in Cloud Shell,
+
+--kubectl expose pod nginx-1 --port 80 --type LoadBalancer
+
+This command creates a LoadBalancer service, which allows the nginx Pod to accessed from internet addresses outside of the cluster.
+
+ To view details about services in the cluster, execute the following command in Cloud Shell,
+
+--kubectl get services
+
+Note: You might have to repeat the command a few times before the new service has its external IP populated
+
+To verify that the nginx container is serving the static HTML file that you copied, execute the following command  in Cloud Shell, using the external IP address of your service that you obtained from the output of the previous step.
+
+
+--curl http://104.154.177.46/test.html
+
+To view the resources being used by the nginx Pod, execute the following command in Cloud Shell,
+
+--kubectl top pods
+
+##Task 4: View details about workloads using command line
+
+The preferred way of deploying Pods and other resources to Kubernetes is through configuration files, which are sometimes called manifest files. 
+Configuration files are typically written in the YAML syntax, specifying the details of the resource. 
+With configuration files, you can more easily specify complex options than with a long line of command-line arguments.
+ YAML syntax is similar to, but more concise than, JSON syntax and it enables the same kind of hierarchical structuring of objects and properties. 
+The source repository for the lab contains sample YAML files that have been prepared for you.
+
+To clone the repository to the lab Cloud Shell, enter the following command  
+
+
+--git clone https://github.com/GoogleCloudPlatformTraining/training-data-analyst
+
+To Change to the directory that contains the sample files for this lab, execute the following
+
+--cd ~/training-data-analyst/courses/ak8s/04_GKE_Shell/
+
+A sample manifest YAML file for a Pod called new-nginx-pod.yaml has been provided for you;
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: new-nginx
+  labels:
+    name: new-nginx
+spec:
+  containers:
+  - name: new-nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+
+To deploy your manifest, execute the following command:
+
+--kubectl apply -f ./new-nginx-pod.yaml
+
+
+To see a list of Pods, execute the following command:
+
+--kubectl get pods
+
+
+Some container images include a shell environment that you can launch. 
+This shell environment might be more convenient than executing individual commands with kubectl.
+ For instance, the nginx image includes a bash shell. 
+In this task you use shell redirection to connect to the bash shell in your new nginx pod to carry out a sequence of actions.
+
+To start an interactive bash shell in the nginx container,  execute the following command in Cloud Shell,
+
+--kubectl exec -it new-nginx /bin/bash
+
+Because the nginx container image has no text editing tools by default, you need to install one.
+
+In Cloud Shell, in the nginx bash shell, execute the following commands to install the nano text editor:
+
+--apt-get update
+  apt-get install nano
+
+In Cloud Shell, in the nginx bash shell, execute the following commands to switch to the static files directory and create a test.html file;
+
+--cd /usr/share/nginx/html
+  nano test.html
+
+In Cloud Shell, in the nginx bash shell nano session, type the following text:
+
+<html> <header><title>This is title</title></header>
+<body> Hello world </body>
+</html>
+
+Press CTRL+X, then press Y and enter to save the file and exit the nano editor.
+
+In Cloud Shell, in the nginx bash shell, execute the following command to exit the nginx bash shell:
+
+--exit
+
+Execute the following command to set up port forwarding from Cloud Shell to the nginx Pod (from port 10081 of the Cloud Shell VM to port 80 of the nginx container):
+
+--kubectl port-forward new-nginx 10081:80
+
+Note:This is a foreground process, so you need to open another Cloud Shell instance to test.
+
+In the Cloud Shell menu bar, click the plus sign (+) icon to start a new Cloud Shell session.
+
+A second Cloud Shell session appears in your Cloud Shell window. You can switch between sessions by clicking the titles in the menu bar.
+
+ To test the modified nginx container through the port forwarding, execute the following command in the second Cloud Shell session,
+
+--curl http://127.0.0.1:10081/test.html
+
+The HTML text you placed in the test.html file is displayed.
+
+In the Cloud Shell menu bar, click the plus sign (+) icon to start another new Cloud Shell session.
+A third Cloud Shell session appears in your Cloud Shell window. As before, you can switch sessions by clicking them in the menu bar.
+
+In third Cloud Shell window, execute the following command to display the logs and to stream new logs as they arrive (and also include timestamps) for the new-nginx Pod:
+
+--kubectl logs new-nginx -f --timestamps
+
+You will see the logs display in this new window
+
+Return to the second Cloud Shell window and re-run the curl command to generate some traffic on the Pod.
+Review the additional log messages as they appear in the third Cloud Shell window.
+
+
+Close the third Cloud Shell window to stop displaying the log messages.
+
+Close the original Cloud Shell window to stop the port forwarding process.
+
+Note: it is advised to delete cluster for provisioned labs.
+To delete a cluster using the gcloud command-line tool, run the following command:
+
+gcloud container clusters delete standard-cluster-1
+
+To close cloud shell, run the following command;
+
+--exit
+
+
